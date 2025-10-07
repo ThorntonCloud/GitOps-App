@@ -32,7 +32,7 @@ jobs:
         run: |
           echo "### 🚀 Image Promotion Details" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Source Image:** \`${DOCKER_IMAGE}:sha-${{ inputs.source_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Source Image:** \`${DOCKER_IMAGE}:${{ inputs.source_sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Target Tag:** \`${{ inputs.target_tag }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** \`${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -56,13 +56,13 @@ jobs:
 
       - name: Pull source image
         run: |
-          SOURCE_IMAGE="${DOCKER_IMAGE}:sha-${{ inputs.source_sha }}"
+          SOURCE_IMAGE="${DOCKER_IMAGE}:${{ inputs.source_sha }}"
           echo "Pulling source image: ${SOURCE_IMAGE}"
           docker pull ${SOURCE_IMAGE}
 
       - name: Tag and push promoted image
         run: |
-          SOURCE_IMAGE="${DOCKER_IMAGE}:sha-${{ inputs.source_sha }}"
+          SOURCE_IMAGE="${DOCKER_IMAGE}:${{ inputs.source_sha }}"
           TARGET_IMAGE="${DOCKER_IMAGE}:${{ inputs.target_tag }}"
           
           echo "Tagging ${SOURCE_IMAGE} as ${TARGET_IMAGE}"

@@ -8,6 +8,11 @@ on:
 env:
   DOCKER_IMAGE: thorntoncloud/nginx-gitops
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest

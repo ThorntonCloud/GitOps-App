@@ -1,0 +1,98 @@
+name: Promote Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: 'Source image SHA (short SHA, e.g., abc1234)'
+        required: true
+        type: string
+      target_tag:
+        description: 'Target tag (e.g., staging, v1.0.0)'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - prod
+
+env:
+  DOCKER_IMAGE: thorntoncloud/nginx-gitops
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    
+    steps:
+      - name: Validate inputs
+        run: |
+          echo "### 🚀 Image Promotion Details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Source Image:** \`${DOCKER_IMAGE}:sha-${{ inputs.source_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Tag:** \`${{ inputs.target_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** \`${{ inputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ inputs.environment }}" == "prod" ]]; then
+            if ! [[ "${{ inputs.target_tag }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ **Error:** Production deployments must use semantic versioning (e.g., v1.0.0)" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          fi
+
+          if [[ "${{ inputs.environment }}" == "staging" ]] && [[ "${{ inputs.target_tag }}" != "staging" ]]; then
+            echo "⚠️ **Warning:** Staging environment should typically use the 'staging' tag" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull source image
+        run: |
+          SOURCE_IMAGE="${DOCKER_IMAGE}:sha-${{ inputs.source_sha }}"
+          echo "Pulling source image: ${SOURCE_IMAGE}"
+          docker pull ${SOURCE_IMAGE}
+
+      - name: Tag and push promoted image
+        run: |
+          SOURCE_IMAGE="${DOCKER_IMAGE}:sha-${{ inputs.source_sha }}"
+          TARGET_IMAGE="${DOCKER_IMAGE}:${{ inputs.target_tag }}"
+          
+          echo "Tagging ${SOURCE_IMAGE} as ${TARGET_IMAGE}"
+          docker tag ${SOURCE_IMAGE} ${TARGET_IMAGE}
+          
+          echo "Pushing ${TARGET_IMAGE}"
+          docker push ${TARGET_IMAGE}
+
+      - name: Run Trivy scan on promoted image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ inputs.target_tag }}
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Promotion summary
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Promotion Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**New image tag created:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`${DOCKER_IMAGE}:${{ inputs.target_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next steps:**" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ inputs.environment }}" == "staging" ]]; then
+            echo "- ArgoCD will automatically sync the staging overlay" >> $GITHUB_STEP_SUMMARY
+            echo "- Verify deployment in staging environment" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ArgoCD will automatically sync the prod overlay" >> $GITHUB_STEP_SUMMARY
+            echo "- Monitor production deployment closely" >> $GITHUB_STEP_SUMMARY
+            echo "- Verify application health in production" >> $GITHUB_STEP_SUMMARY
+          fi

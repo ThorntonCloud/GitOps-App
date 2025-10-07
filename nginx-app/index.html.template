@@ -131,7 +131,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 Deployment Info</h1>
+            <h1>🚀 Deployment Info!</h1>
             <div class="status-badge">
                 <span class="status-indicator"></span>
                 ${ENVIRONMENT}

@@ -54,7 +54,7 @@ jobs:
       - name: Run Trivy vulnerability scanner (SARIF output)
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ steps.meta.outputs.sha_tag }}
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.sha }}
           format: 'sarif'
           output: 'trivy-results.sarif'
 

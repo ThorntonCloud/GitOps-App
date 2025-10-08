@@ -2,13 +2,13 @@
 
 A containerized Nginx application designed specifically to demonstrate GitOps principles and workflows. This application serves as the deployment target for the [GitOps-Infra](https://github.com/ThorntonCloud/GitOps-Infra) repository, which contains Kustomize configurations and ArgoCD applications.
 
-## 🎯 Purpose
+## Purpose
 
 This repository contains the **application code** for a GitOps demonstration. The actual deployment manifests, Kustomize overlays, and ArgoCD configurations live in the separate **[GitOps-Infra](https://github.com/ThorntonCloud/GitOps-Infra)** repository, following GitOps best practices of separating application source from deployment configuration.
 
 > **Note:** This container is optimized for Kubernetes deployment and may not run properly in local Docker environments due to its security-hardened configuration (non-root user, specific volume mounts, etc.). For local development, use something like [kind](https://kind.sigs.k8s.io).
 
-## 🏗️ Repository Structure
+## Repository Structure
 
 ```
 .
@@ -22,7 +22,7 @@ This repository contains the **application code** for a GitOps demonstration. Th
 └── README.md
 ```
 
-## 🔧 Container Configuration
+## Container Configuration
 
 ### Dockerfile
 
@@ -105,7 +105,7 @@ pid /tmp/nginx.pid;
 | `/health` | Health check | Kubernetes liveness/readiness probes |
 | `/metrics` | Metrics stub | Prometheus monitoring integration |
 
-## 🚀 GitOps Workflow
+## GitOps Workflow
 
 This application follows the **pull-based GitOps model** with a **two-repository pattern** and **manual promotion gates**:
 
@@ -180,7 +180,7 @@ This separation follows GitOps principles by decoupling:
 - **What** runs (application code) ← This repo
 - **Where** and **how** it runs (deployment configuration) ← GitOps-Infra repo
 
-## 📊 Observability Features
+## Observability Features
 
 ### Health Monitoring
 
@@ -242,7 +242,7 @@ These logs integrate seamlessly with:
 - CloudWatch Container Insights
 - Datadog
 
-## 🔐 Security Features
+## Security Features
 
 1. **Distroless Base Image**: Chainguard images have 80-90% fewer CVEs
 2. **Non-Root Execution**: Runs as UID 65532
@@ -250,7 +250,7 @@ These logs integrate seamlessly with:
 4. **Security Headers**: OWASP recommended headers enabled
 5. **Non-Privileged Port**: Uses port 8080 instead of 80
 
-## 🔄 CI/CD Workflows
+## CI/CD Workflows
 
 This repository implements a **two-stage GitOps promotion model** with automated CI and manual promotion gates for production safety.
 
@@ -388,7 +388,7 @@ Environment: prod
 - Rollback-friendly: previous versions remain available
 - Audit trail via Git history and Docker Hub tags
 
-## 📚 Related Resources
+## Related Resources
 
 - **[GitOps-Infra Repository](https://github.com/ThorntonCloud/GitOps-Infra)** - Kustomize configurations and ArgoCD apps
 - [Chainguard Images](https://www.chainguard.dev/chainguard-images) - Distroless container images
@@ -396,7 +396,7 @@ Environment: prod
 - [Kustomize Documentation](https://kustomize.io/) - Kubernetes configuration management
 - [OpenGitOps Principles](https://opengitops.dev/) - GitOps standards
 
-## 🤝 Contributing
+## Contributing
 
 This is a demonstration repository. For actual deployment modifications, see the [GitOps-Infra](https://github.com/ThorntonCloud/GitOps-Infra) repository.
 

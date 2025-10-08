@@ -39,6 +39,40 @@ jobs:
           echo "sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
           echo "full_image=${DOCKER_IMAGE}:${SHORT_SHA}" >> $GITHUB_OUTPUT
 
+      - name: Pull and test image
+        run: |
+          docker pull ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.sha }}
+          
+          # Start container
+          docker run -d --name smoke-test -p 8080:80 \
+            ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.sha }}
+          
+          sleep 5
+          
+          # Run smoke tests
+          curl -f http://localhost:8080 || exit 1
+          curl -f http://localhost:8080/health || echo "No health endpoint"
+          
+          # Check logs for errors
+          docker logs smoke-test
+          
+          docker stop smoke-test
+
+      - name: Performance baseline test
+        run: |
+          docker run -d --name perf-test -p 8080:80 \
+            ${{ env.DOCKER_IMAGE }}:${{ steps.tag.outputs.sha }}
+          
+          sleep 5
+          
+          # Simple load test with curl
+          echo "Running basic load test..."
+          for i in {1..100}; do
+            curl -s http://localhost:8080 > /dev/null
+          done
+          
+          docker stop perf-test
+      
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:

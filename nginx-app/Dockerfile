@@ -13,6 +13,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 COPY version.json /usr/share/nginx/html/.version.json
 
-COPY error-pages/ /usr/share/nginx/html/errors/
+COPY 404.html /usr/share/nginx/html/404.html
+COPY 50x.html /usr/share/nginx/html/50x.html
 
 EXPOSE 8080

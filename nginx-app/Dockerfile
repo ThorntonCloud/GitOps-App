@@ -11,9 +11,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
-COPY version.json /usr/share/nginx/html/.version.json
-
-COPY 404.html /usr/share/nginx/html/404.html
-COPY 50x.html /usr/share/nginx/html/50x.html
-
 EXPOSE 8080
